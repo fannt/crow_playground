@@ -1,16 +1,15 @@
 
 -- params
-top = 220 -- top bpm
-bottom = 30 -- bottom bpm
-rate = 0.05 -- scan rate
+top = 1000 -- top bpm
+bottom = 50 -- bottom bpm
+rate = 0.005 -- scan rate
 
-hysteresis = 10 -- loops 
-threshold = 4.2 --volts
+-- hysteresis = 10 -- loops 
+threshold = 4.5 --volts
 
 -- vars
 bpm = 120
 loops = 0 -- scans since last beat detected
-lastValue = 0
 
 input[1].stream = function(state)
     computeBpm(state)
@@ -19,16 +18,23 @@ end
 
 function computeBpm(value)
     -- if value then unwrapedValue = value end
+    -- if loops < hysteresis then lastValue = value return end
+
     loops = loops + 1
-    if loops < hysteresis then lastValue = value return end
     if value > threshold then -- detect 
         if value > lastValue then --and rise
-            -- print(loops)
-            bpm = loops * rate * 60 
-            print(bpm)
-            loops = 0
+            if lastValue < threshold then --pass
+                -- print(loops)
+                -- loopsPerSec = loops / rate
+                period = rate * loops
+                -- print(period)
+                bpm = 60 / period
+                -- print(bpm)
+                loops = 1
+            end
         end
     end
+
     lastValue = value
 end
 
